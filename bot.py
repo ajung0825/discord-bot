@@ -8,6 +8,7 @@ import os
 intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
+intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -43,6 +44,17 @@ def get_user(user_id):
         }
     return users[user_id]
 
+# 기본 역할 지급
+@bot.event
+async def on_member_join(member):
+    role = member.guild.get_role(1498677081029087467)
+    
+    if role:
+        await member.add_roles(role)
+        print(f"{member}에게 기본 역할 지급 완료")
+    else:
+        print("역할을 찾을 수 없음")
+    
 # 도움말
 @bot.command(name="명령어")
 async def 도움말(ctx):

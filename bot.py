@@ -162,6 +162,15 @@ async def on_voice_state_update(member, before, after):
                 user["points"] += minutes * 5
                 save_data()
 
+@bot.tree.command(name="초기화", description="[관리자] 모든 유저의 포인트를 0으로 초기화합니다.")
+@app_commands.checks.has_permissions(administrator=True)
+async def 초기화(interaction: discord.Interaction):
+    global users
+    users = {} # 메모리상의 데이터를 비움
+    save_data() # 비워진 데이터를 파일에 덮어씀
+    
+    await interaction.response.send_message("🧹 모든 유저의 포인트 데이터가 초기화되었습니다!", ephemeral=False)
+
 # 봇 실행
 TOKEN = os.getenv("DISCORD_TOKEN")
 bot.run(TOKEN)

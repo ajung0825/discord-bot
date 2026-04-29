@@ -5,6 +5,24 @@ from datetime import datetime, timedelta
 import json
 import os
 
+@bot.event
+async def on_member_join(member):
+    # 지급할 역할 ID
+    ROLE_ID = 1498677081029087467
+    role = member.guild.get_role(ROLE_ID)
+    
+    if role:
+        try:
+            # 역할 지급 시도
+            await member.add_roles(role)
+            # 로그에만 기록 (서버 채팅창에는 아무것도 안 뜸)
+            print(f"DEBUG: {member.name}에게 역할 지급 성공")
+        except:
+            # 권한 부족 등 실패 시에도 서버에는 아무 말 안 함
+            print(f"DEBUG: {member.name}에게 역할 지급 실패 (권한 등 확인 필요)")
+    else:
+        print(f"DEBUG: 역할 ID {ROLE_ID}를 찾지 못함")
+
 # --- 봇 설정 (슬래시 명령어 동기화 포함) ---
 class MyBot(commands.Bot):
     def __init__(self):
@@ -53,7 +71,7 @@ async def on_ready():
 async def 도움말(interaction: discord.Interaction):
     embed = discord.Embed(title="📘 포인트 봇 도움말", color=discord.Color.blue())
     embed.add_field(name="👤 유저", value="`/출석`, `/포인트`, `/랭킹`, `/타임아웃`", inline=False)
-    embed.add_field(name="👑 관리자", value="`/지급`, `/차감`", inline=False)
+    embed.add_field(name="👑 관리자", value="`/지급`, `/차감`, `/초기화`", inline=False)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="출석", description="매일 한 번씩 300포인트를 획득합니다.")
@@ -75,7 +93,7 @@ async def 포인트(interaction: discord.Interaction):
     user = get_user(interaction.user.id)
     await interaction.response.send_message(f"💰 {interaction.user.mention}님의 현재 포인트: **{user['points']}P**")
 
-@bot.tree.command(name="타임아웃", description="900포인트를 소모하여 특정 유저를 1분간 대화 금지 시킵니다.")
+@bot.tree.command(name="타임아웃", description="900포인트를 소모하여 특정 를 1분간 타임아웃 시킵니다.")
 @app_commands.describe(member="타임아웃을 적용할 대상 유저를 선택하세요.")
 async def 타임아웃(interaction: discord.Interaction, member: discord.Member):
     user = get_user(interaction.user.id)
@@ -106,7 +124,7 @@ async def 지급(interaction: discord.Interaction, member: discord.Member, amoun
     save_data()
     await interaction.response.send_message(f"💎 {member.mention}님에게 **{amount}P**를 지급했습니다.")
 
-@bot.tree.command(name="차감", description="[관리자] 특정 유저의 포인트를 회수합니다.")
+@bot.tree.command(name="차감", description="[관리자] 특정 유저의 포인트를 차감합니다.")
 @app_commands.describe(member="포인트를 뺏을 유저", amount="차감할 포인트 양")
 @app_commands.checks.has_permissions(administrator=True)
 async def 차감(interaction: discord.Interaction, member: discord.Member, amount: int):
@@ -174,7 +192,6 @@ async def 초기화(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     load_data()
-    # 이 문장을 추가하고 봇을 다시 켜보세요
     await bot.tree.sync() 
     print(f"✅ {bot.user} 로그온 및 명령어 동기화 완료!")
 

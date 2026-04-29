@@ -171,6 +171,13 @@ async def 초기화(interaction: discord.Interaction):
     
     await interaction.response.send_message("🧹 모든 유저의 포인트 데이터가 초기화되었습니다!", ephemeral=False)
 
+@bot.event
+async def on_ready():
+    load_data()
+    # 이 문장을 추가하고 봇을 다시 켜보세요
+    await bot.tree.sync() 
+    print(f"✅ {bot.user} 로그온 및 명령어 동기화 완료!")
+
 # 봇 실행
 TOKEN = os.getenv("DISCORD_TOKEN")
 bot.run(TOKEN)
